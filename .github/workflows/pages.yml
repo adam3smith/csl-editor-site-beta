@@ -35,7 +35,27 @@ jobs:
         run: gem install jekyll bundler
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
+
+      - name: Pre-process files
+        run: |
+          # Replace $GIT_COMMIT with actual commit hash in HTML files
+          GIT_COMMIT=$(git rev-parse HEAD)
+          echo "Git commit: $GIT_COMMIT"
+
+          # Find and process HTML files
+          find cslEditorLib/pages -name "*.html" -o -name "index.html" | while read file; do
+            if [ -f "$file" ]; then
+              echo "Processing $file"
+              sed "s/\$GIT_COMMIT/$GIT_COMMIT/g" "$file" > "$file.tmp"
+              mv "$file.tmp" "$file"
+            fi
+          done
+
+          # Remove PHP files (security)
+          find external -name "*.php" -type f -delete 2>/dev/null || true
+          find cslEditorLib/external -name "*.php" -type f -delete 2>/dev/null || true
 
       - name: Build with Jekyll
         run: |
