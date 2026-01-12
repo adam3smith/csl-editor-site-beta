@@ -3,3 +3,5 @@
 *.jsxdr
 csledit/exampleCitationsGenerator/node_modules
 _site
+tmp/
+.jekyll-cache/

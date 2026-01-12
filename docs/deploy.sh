@@ -1,12 +1,12 @@
 #!/bin/bash
+set -e  # Exit on any error
 
 # Use the requirejs optimizer r.js to optimise js files
 
 # Will deploy the site the ./docs directory in the current branch.
 
 echo ""
-echo "Instructions"
-echo "Deploys to the ./docs directory and pushes to git repository"
+echo "=== Deploying to ./docs directory ==="
 echo ""
 
 
@@ -24,14 +24,13 @@ fi
 
 
 rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 
-node cslEditorLib/external/r.js -o build.js dir=$BUILD_DIR
-
-# doing this becuase the cjsTranslate r.js option breaks citeproc.js
-ORIGINAL_CITEPROC=$(find cslEditorLib/external/citeproc/citeproc*.js)
-BUILD_CITEPROC=$(find $BUILD_DIR/cslEditorLib/external/citeproc/citeproc*.js)
-echo "copying $ORIGINAL_CITEPROC to $BUILD_CITEPROC"
-cp $ORIGINAL_CITEPROC $BUILD_CITEPROC
+# Skip RequireJS optimization - it uses old UglifyJS that can't handle modern ES6+ syntax
+# The site loads modules directly via RequireJS, so optimization isn't critical for beta
+echo "Copying files to build directory..."
+# Use rsync or tar to avoid copying tmp into itself
+tar --exclude='./tmp' --exclude='./.git' --exclude='./docs' -cf - . | (cd "$BUILD_DIR" && tar -xf -)
 
 # Replace $GIT_COMMIT with the git commit hash in all php files
 GIT_COMMIT=$(git rev-parse HEAD)
@@ -40,20 +39,26 @@ echo "git commit is $GIT_COMMIT"
 
 cd $BUILD_DIR
 
-find cslEditorLib/pages/*.html >> find */index.html > filesToConvert
+# Find HTML files to process (fix: was using >> before find command)
+find cslEditorLib/pages -name "*.html" > filesToConvert 2>/dev/null || true
+find . -maxdepth 2 -name "index.html" >> filesToConvert 2>/dev/null || true
 
-while read FILENAME;
-do
-echo "converting $FILENAME"
-sed s/\$GIT_COMMIT/$GIT_COMMIT/g <$FILENAME >tempFile
-mv tempFile $FILENAME
-done < filesToConvert
-rm filesToConvert
+# Replace $GIT_COMMIT in HTML files
+if [ -s filesToConvert ]; then
+	while read FILENAME;
+	do
+		if [ -f "$FILENAME" ]; then
+			echo "converting $FILENAME"
+			sed s/\$GIT_COMMIT/$GIT_COMMIT/g <$FILENAME >tempFile
+			mv tempFile $FILENAME
+		fi
+	done < filesToConvert
+fi
+rm -f filesToConvert
 
 # Remove any *.php files in external libraries
-
-find external -name "*.php" -type f -print0 | xargs -0 rm -f
-find cslEditorLib/external -name "*.php" -type f -print0 | xargs -0 rm -f
+find external -name "*.php" -type f -print0 2>/dev/null | xargs -0 rm -f || true
+find cslEditorLib/external -name "*.php" -type f -print0 2>/dev/null | xargs -0 rm -f || true
 
 # Run Jekyll
 jekyll build
@@ -69,11 +74,14 @@ cd ../docs
 cp -r ../tmp/_site/* ./
 
 cd ..
-# Clean_up
+# Clean up
 rm -rf "$BUILD_DIR"
 
-git add --all
-git commit -m "deploy"
-git push
+echo ""
+echo "=== Build complete! ==="
+echo ""
+echo "Review changes with: git status"
+echo "To commit and push: git add --all && git commit -m 'deploy' && git push"
+echo ""
 
 
