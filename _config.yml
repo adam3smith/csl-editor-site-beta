@@ -1,4 +1,5 @@
 port: 5001
+baseurl: "/csl-editor-site-beta"
 exclude:
   - "cslEditorLib/exampleCitationsGenerator"
   - ".git"
