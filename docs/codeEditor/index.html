@@ -5,9 +5,9 @@
 
 	<title>CSL Code Editor</title>
 
-	<link rel="stylesheet" type="text/css" href="../cslEditorLib/css/codemirror.css?bust=dd08c4325b59119917ebcd5f3c83507bf6fc5db2" />
+	<link rel="stylesheet" type="text/css" href="../cslEditorLib/css/codemirror.css?bust=c5e9c68c341314c1a2811b1bff9fbb9cb8f0342a" />
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.9.1/themes/ui-lightness/jquery-ui.css">
-	<link rel="stylesheet" type="text/css" href="../cslEditorLib/css/base.css?bust=dd08c4325b59119917ebcd5f3c83507bf6fc5db2" />
+	<link rel="stylesheet" type="text/css" href="../cslEditorLib/css/base.css?bust=c5e9c68c341314c1a2811b1bff9fbb9cb8f0342a" />
 	<style type="text/css">
 		#codeEditorContainer {
 			position: absolute;
@@ -26,7 +26,7 @@
 	<script>
 		require.config({
 			baseUrl: "../cslEditorLib",
-			urlArgs : "bust=dd08c4325b59119917ebcd5f3c83507bf6fc5db2"
+			urlArgs : "bust=c5e9c68c341314c1a2811b1bff9fbb9cb8f0342a"
 		});
 		requirejs(['src/config'], function (config) {
 			require(['src/CodeEditor'], function () {
@@ -37,6 +37,10 @@
 	<script type="text/javascript" src="../src/analytics.js"></script>
 </head>
 <body id="codeEditor">
+<script type="text/javascript">
+	// Set base path for GitHub Pages deployment
+	window.CSL_EDITOR_BASE_PATH = '/csl-editor-site-beta';
+</script>
 <style type="text/css">
 #navigationBar {
 	font-family: Helvetica, Arial, sans-serif;

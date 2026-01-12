@@ -1,0 +1,4 @@
+# Local development config - overrides _config.yml
+# Usage: jekyll serve --config _config.yml,_config.local.yml
+
+baseurl: ""

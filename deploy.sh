@@ -26,6 +26,8 @@ mkdir -p ./docs
 
 # Copy only the necessary directories/files from _site to docs
 echo "Copying built site to docs..."
+# Add .nojekyll to prevent GitHub Pages from running Jekyll processing
+touch ./docs/.nojekyll
 cp -r _site/cslEditorLib ./docs/
 cp -r _site/about ./docs/
 cp -r _site/codeEditor ./docs/

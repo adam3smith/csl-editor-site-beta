@@ -5,6 +5,7 @@ exclude:
   - ".git"
   - ".gitignore"
   - ".gitmodules"
+  - "_config.local.yml"
   - ".github"
   - ".jekyll-cache"
   - "deploy.sh"
