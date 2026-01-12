@@ -25,6 +25,19 @@ jobs:
           # Don't use shallow clone - codemirror2 submodule doesn't support it
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build cslEditorLib
+        run: |
+          cd cslEditorLib
+          npm install
+          npm run build:styles
+          npm run build:citations
+          cd ..
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -40,22 +53,23 @@ jobs:
 
       - name: Pre-process files
         run: |
-          # Replace $GIT_COMMIT with actual commit hash in HTML files
+          # Replace $GIT_COMMIT with actual commit hash in ALL relevant files
           GIT_COMMIT=$(git rev-parse HEAD)
           echo "Git commit: $GIT_COMMIT"
 
-          # Find and process HTML files
-          find cslEditorLib/pages -name "*.html" -o -name "index.html" | while read file; do
-            if [ -f "$file" ]; then
-              echo "Processing $file"
-              sed "s/\$GIT_COMMIT/$GIT_COMMIT/g" "$file" > "$file.tmp"
-              mv "$file.tmp" "$file"
-            fi
+          # Process HTML files
+          find . -name "*.html" -type f | while read file; do
+            echo "Processing $file"
+            sed -i "s/\\\$GIT_COMMIT/$GIT_COMMIT/g" "$file"
+          done
+
+          # Process JS files that might have cache busters
+          find . -name "*.js" -type f | while read file; do
+            sed -i "s/\\\$GIT_COMMIT/$GIT_COMMIT/g" "$file"
           done
 
           # Remove PHP files (security)
-          find external -name "*.php" -type f -delete 2>/dev/null || true
-          find cslEditorLib/external -name "*.php" -type f -delete 2>/dev/null || true
+          find . -name "*.php" -type f -delete 2>/dev/null || true
 
       - name: Build with Jekyll
         run: |
