@@ -1,81 +1,49 @@
 #!/bin/bash
 set -e  # Exit on any error
 
-# Use the requirejs optimizer r.js to optimise js files
-
-# Will deploy the site the ./docs directory in the current branch.
-
 echo ""
 echo "=== Deploying to ./docs directory ==="
 echo ""
 
-
-if [ ! -d "./docs" ]; then
-  mkdir docs
-fi
-
-if [ -d tmp ]; then
-  BUILD_DIR="./tmp"
-else
-  mkdir tmp
-  BUILD_DIR="./tmp"
-fi
-
-
-
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"
-
-# Skip RequireJS optimization - it uses old UglifyJS that can't handle modern ES6+ syntax
-# The site loads modules directly via RequireJS, so optimization isn't critical for beta
-echo "Copying files to build directory..."
-# Use rsync or tar to avoid copying tmp into itself
-tar --exclude='./tmp' --exclude='./.git' --exclude='./docs' -cf - . | (cd "$BUILD_DIR" && tar -xf -)
-
-# Replace $GIT_COMMIT with the git commit hash in all php files
+# Get git commit hash for cache busting
 GIT_COMMIT=$(git rev-parse HEAD)
+echo "Git commit: $GIT_COMMIT"
 
-echo "git commit is $GIT_COMMIT"
-
-cd $BUILD_DIR
-
-# Find HTML files to process (fix: was using >> before find command)
-find cslEditorLib/pages -name "*.html" > filesToConvert 2>/dev/null || true
-find . -maxdepth 2 -name "index.html" >> filesToConvert 2>/dev/null || true
-
-# Replace $GIT_COMMIT in HTML files
-if [ -s filesToConvert ]; then
-	while read FILENAME;
-	do
-		if [ -f "$FILENAME" ]; then
-			echo "converting $FILENAME"
-			sed s/\$GIT_COMMIT/$GIT_COMMIT/g <$FILENAME >tempFile
-			mv tempFile $FILENAME
-		fi
-	done < filesToConvert
-fi
-rm -f filesToConvert
-
-# Remove any *.php files in external libraries
-find external -name "*.php" -type f -print0 2>/dev/null | xargs -0 rm -f || true
-find cslEditorLib/external -name "*.php" -type f -print0 2>/dev/null | xargs -0 rm -f || true
-
-# Run Jekyll
+# Run Jekyll to build site
+echo "Running Jekyll build..."
 jekyll build
 
-#don't use docs directory in build
-rm -rf ./_site/docs
+# Replace $GIT_COMMIT in the BUILT files (in _site), not the source
+echo "Replacing \$GIT_COMMIT with actual commit hash in built files..."
+find _site -name "*.html" -type f | while read file; do
+  sed -i.bak "s/\$GIT_COMMIT/$GIT_COMMIT/g" "$file" && rm "$file.bak"
+done
 
-#clean up docs directory
-rm -rf ../docs/*
-cd ../docs
+# Clean docs directory
+echo "Cleaning docs directory..."
+rm -rf ./docs/*
+mkdir -p ./docs
 
-
-cp -r ../tmp/_site/* ./
-
-cd ..
-# Clean up
-rm -rf "$BUILD_DIR"
+# Copy only the necessary directories/files from _site to docs
+echo "Copying built site to docs..."
+cp -r _site/cslEditorLib ./docs/
+cp -r _site/about ./docs/
+cp -r _site/codeEditor ./docs/
+cp -r _site/cslDataExporter ./docs/
+cp -r _site/external ./docs/
+cp -r _site/home ./docs/
+cp -r _site/html ./docs/
+cp -r _site/images ./docs/
+cp -r _site/searchByExample ./docs/
+cp -r _site/searchByName ./docs/
+cp -r _site/settings ./docs/
+cp -r _site/src ./docs/
+cp -r _site/styleInfo ./docs/
+cp -r _site/visualEditor ./docs/
+cp _site/index.html ./docs/
+cp _site/CNAME ./docs/ 2>/dev/null || true
+cp _site/MIT-LICENCE.txt ./docs/ 2>/dev/null || true
+cp _site/*.html ./docs/ 2>/dev/null || true
 
 echo ""
 echo "=== Build complete! ==="
