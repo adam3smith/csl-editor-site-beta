@@ -1,2 +1,22 @@
 port: 5001
-exclude: ["cslEditorLib/exampleCitationsGenerator", ".git"]
+exclude:
+  - "cslEditorLib/exampleCitationsGenerator"
+  - ".git"
+  - ".gitignore"
+  - ".gitmodules"
+  - ".github"
+  - ".jekyll-cache"
+  - "deploy.sh"
+  - "build.js"
+  - "configure.sh"
+  - "*.md"
+  - "README.md"
+  - "DEPLOYMENT.md"
+  - "STAGING.md"
+  - "INTEGRATION_NOTES.md"
+  - "MODERNIZATION_COMPLETE.md"
+  - "PHASE_5_1_COMPLETE.md"
+  - "node_modules"
+  - "package.json"
+  - "package-lock.json"
+  - ".jshintrc"
