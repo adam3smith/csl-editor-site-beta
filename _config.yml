@@ -2,6 +2,10 @@ port: 5001
 baseurl: "/csl-editor-site-beta"
 exclude:
   - "cslEditorLib/exampleCitationsGenerator"
+  - "cslEditorLib/external/csl-styles"
+  - "cslEditorLib/external/locales"
+  - "cslEditorLib/external/csl-schema"
+  - "cslEditorLib/external/jstree"
   - ".git"
   - ".gitignore"
   - ".gitmodules"

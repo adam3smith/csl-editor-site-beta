@@ -29,6 +29,14 @@ echo "Copying built site to docs..."
 # Add .nojekyll to prevent GitHub Pages from running Jekyll processing
 touch ./docs/.nojekyll
 cp -r _site/cslEditorLib ./docs/
+
+# Copy directories excluded from Jekyll (too many files for Jekyll to process)
+echo "Copying style/locale data (excluded from Jekyll for speed)..."
+mkdir -p ./docs/cslEditorLib/external
+cp -r cslEditorLib/external/csl-styles ./docs/cslEditorLib/external/
+cp -r cslEditorLib/external/locales ./docs/cslEditorLib/external/
+cp -r cslEditorLib/external/csl-schema ./docs/cslEditorLib/external/
+cp -r cslEditorLib/external/jstree ./docs/cslEditorLib/external/
 cp -r _site/about ./docs/
 cp -r _site/codeEditor ./docs/
 cp -r _site/cslDataExporter ./docs/
